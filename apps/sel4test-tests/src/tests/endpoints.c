@@ -233,6 +233,11 @@ static int test_ep_cancelBadgedSends2(env_t env)
             }
         }
     }
+
+    for (int i = 0; i < NUM_BADGED_CLIENTS; i++) {
+        cleanup_helper(env, &helpers[i].thread);
+    }
+
     return sel4test_get_result();
 }
 DEFINE_TEST(CANCEL_BADGED_SENDS_0002, "cancelBadgedSends deletes caps", test_ep_cancelBadgedSends2, true)

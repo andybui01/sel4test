@@ -314,6 +314,12 @@ void start_helper(env_t env, helper_thread_t *thread, helper_fn_t entry_point,
 
 void cleanup_helper(env_t env, helper_thread_t *thread)
 {
+#ifdef CONFIG_HAVE_FPU
+    cspacepath_t temp;
+    vka_cspace_make_path(&env->vka, thread->fpu_untyped.cptr, &temp);
+    vka_cnode_revoke(&temp);
+#endif
+
     seL4_TCB_Suspend(thread->thread.tcb.cptr);
     vka_free_object(&env->vka, &thread->local_endpoint);
 
@@ -351,6 +357,13 @@ void create_helper_thread_custom_stack(env_t env, helper_thread_t *thread, size_
     config = thread_config_stack_size(config, stack_pages);
     error = sel4utils_configure_thread_config(&env->vka, &env->vspace, &env->vspace,
                                               config, &thread->thread);
+
+#ifdef CONFIG_HAVE_FPU
+    vka_alloc_untyped(&env->vka, seL4_FPUBits, &thread->fpu_untyped);
+    vka_cspace_alloc_path(&env->vka, &thread->fpu);
+    simple_get_FPU(&env->simple, thread->fpu_untyped.cptr, thread->fpu);
+    seL4_TCB_BindFPU(thread->thread.tcb.cptr, thread->fpu.capPtr);
+#endif
     assert(error == 0);
 }
 
