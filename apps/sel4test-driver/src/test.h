@@ -86,12 +86,6 @@ struct driver_env {
 
     /* time server for managing timeouts */
     time_manager_t tm;
-
-    /* untyped use for FPU */
-    vka_object_t fpu_untyped;
-
-    /* actual FPU */
-    cspacepath_t fpu;
 };
 typedef struct driver_env *driver_env_t;
 

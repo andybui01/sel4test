@@ -194,14 +194,6 @@ void basic_set_up(uintptr_t e)
     error = sel4utils_configure_process_custom(&(env->test_process), &env->vka, &env->vspace, config);
     assert(error == 0);
 
-#ifdef CONFIG_HAVE_FPU
-    /* Set up FPU */
-    vka_alloc_untyped(&env->vka, seL4_FPUBits, &env->fpu_untyped);
-    vka_cspace_alloc_path(&env->vka, &env->fpu);
-    simple_get_FPU(&env->simple, env->fpu_untyped.cptr, env->fpu);
-    seL4_TCB_BindFPU(env->test_process.thread.tcb.cptr, env->fpu.capPtr);
-#endif
-
     /* set up caps about the process */
     env->init->stack_pages = CONFIG_SEL4UTILS_STACK_SIZE / PAGE_SIZE_4K;
     env->init->stack = env->test_process.thread.stack_top - CONFIG_SEL4UTILS_STACK_SIZE;
@@ -306,12 +298,6 @@ void basic_tear_down(uintptr_t e)
     driver_env_t env = (driver_env_t)e;
     /* unmap the env->init data frame */
     vspace_unmap_pages(&(env->test_process).vspace, env->remote_vaddr, 1, PAGE_BITS_4K, NULL);
-
-#ifdef CONFIG_HAVE_FPU
-    cspacepath_t temp;
-    vka_cspace_make_path(&env->vka, env->fpu_untyped.cptr, &temp);
-    vka_cnode_revoke(&temp);
-#endif
 
     /* reset all the untypeds for the next test */
     for (int i = 0; i < env->num_untypeds; i++) {
