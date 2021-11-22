@@ -70,6 +70,8 @@ struct driver_env env;
 static vka_object_t untypeds[CONFIG_MAX_NUM_BOOTINFO_UNTYPED_CAPS];
 /* list of sizes (in bits) corresponding to untyped */
 static uint8_t untyped_size_bits_list[CONFIG_MAX_NUM_BOOTINFO_UNTYPED_CAPS];
+/* FPU object for rootserver */
+static vka_object_t fpu_vka;
 
 extern char _cpio_archive[];
 extern char _cpio_archive_end[];
@@ -613,6 +615,9 @@ int main(void)
      * manager, timer
      */
     init_env(&env);
+
+    vka_alloc_fpu(&env.vka, &fpu_vka);
+    seL4_TCB_BindFPU(seL4_CapInitThreadTCB, fpu_vka.cptr);
 
     /* Partially overwrite part of the VKA implementation to cache objects. We need to
      * create this wrapper as the actual vka implementation will only

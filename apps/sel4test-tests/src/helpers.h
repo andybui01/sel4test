@@ -47,9 +47,6 @@ typedef struct helper_thread {
 
     bool is_process;
 
-    /* untyped use for FPU */
-    vka_object_t fpu_untyped;
-
     /* actual FPU */
     cspacepath_t fpu;
 } helper_thread_t;
