@@ -86,6 +86,12 @@ struct driver_env {
 
     /* time server for managing timeouts */
     time_manager_t tm;
+
+    /* untyped use for FPU */
+    vka_object_t fpu_untyped;
+
+    /* actual FPU */
+    cspacepath_t fpu;
 };
 typedef struct driver_env *driver_env_t;
 
@@ -94,4 +100,3 @@ void plat_init(driver_env_t env) WEAK;
 #ifdef CONFIG_TK1_SMMU
 seL4_SlotRegion arch_copy_iospace_caps_to_process(sel4utils_process_t *process, driver_env_t env);
 #endif
-
