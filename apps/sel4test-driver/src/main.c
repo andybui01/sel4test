@@ -616,9 +616,6 @@ int main(void)
      */
     init_env(&env);
 
-    vka_alloc_fpu(&env.vka, &fpu_vka);
-    seL4_TCB_BindFPU(seL4_CapInitThreadTCB, fpu_vka.cptr);
-
     /* Partially overwrite part of the VKA implementation to cache objects. We need to
      * create this wrapper as the actual vka implementation will only
      * allocate/return any given device frame once.
