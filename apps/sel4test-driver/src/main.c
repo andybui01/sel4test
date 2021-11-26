@@ -94,6 +94,9 @@ static void init_env(driver_env_t env)
     /* create a vka (interface for interacting with the underlying allocator) */
     allocman_make_vka(&env->vka, allocman);
 
+    vka_alloc_fpu(&env->vka, &fpu_vka);
+    seL4_TCB_BindFPU(seL4_CapInitThreadTCB, fpu_vka.cptr);
+
     /* create a vspace (virtual memory management interface). We pass
      * boot info not because it will use capabilities from it, but so
      * it knows the address and will add it as a reserved region */
