@@ -595,6 +595,7 @@ static irq_id_t sel4test_timer_irq_register(UNUSED void *cookie, ps_irq_t irq, i
 /* When the root task exists, it should simply suspend itself */
 static void sel4test_exit(int code)
 {
+    // seL4_DebugDumpScheduler();
     seL4_TCB_Suspend(seL4_CapInitThreadTCB);
 }
 
@@ -660,6 +661,10 @@ int main(void)
 
     /* Run sel4test-test related tests */
     error = sel4utils_run_on_stack(&env.vspace, main_continued, NULL, &res);
+
+    // seL4_TCB_UnbindFPU(seL4_CapInitThreadTCB);
+    // vka_free_object(&env.vka, &fpu_vka);
+
     test_assert_fatal(error == 0);
     test_assert_fatal(res == 0);
 

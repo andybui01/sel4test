@@ -106,12 +106,15 @@ static int test_fpu_multithreaded(struct env *env)
                          (seL4_Word) &thread_state[i], iterations, 0, 0);
         }
 
+        printf("cleanup\n");
         /* Wait for the threads to finish. */
         num_preemptions = 0;
         for (int i = 0; i < NUM_THREADS; i++) {
             num_preemptions += wait_for_helper(&thread[i]);
             cleanup_helper(env, &thread[i]);
         }
+
+        printf("cleanup done\n");
 
         /* Ensure they all got the same result. An assert failure here
          * indicates FPU corrupt (i.e., a kernel bug). */
