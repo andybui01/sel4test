@@ -359,9 +359,7 @@ int wait_for_helper(helper_thread_t *thread)
 {
     seL4_Word badge;
 
-    printf("Before\n");
     api_recv(thread->local_endpoint.cptr, &badge, thread->thread.reply.cptr);
-    printf("After\n");
     return seL4_GetMR(0);
 }
 

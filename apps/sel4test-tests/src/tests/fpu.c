@@ -26,84 +26,6 @@ static double fpu_calculation(void)
     return a;
 }
 
-static int dummy(seL4_Word p1, seL4_Word p2, seL4_Word p3, seL4_Word p4)
-{
-    volatile double *state = (volatile double *)p1;
-    int num_iterations = p2;
-    static volatile int preemption_counter = 0;
-    int num_preemptions = 0;
-
-    while (num_iterations >= 0) {
-        int counter_init = preemption_counter;
-
-        /* Do some random calculation (where we know the result). */
-        double a = fpu_calculation();
-
-        /* It's workaround to solve precision discrepancy when comparing
-         * floating value in FPU from different sources */
-        *state = a;
-        a = *state;
-
-        /* Determine if we were preempted mid-calculation. */
-        if (counter_init != preemption_counter) {
-            num_preemptions++;
-        }
-        preemption_counter++;
-
-        num_iterations--;
-    }
-
-    return num_preemptions;
-}
-
-static int test_fpu_bomb(env_t env)
-{
-    const int NUM_THREADS = 4;
-    helper_thread_t thread[NUM_THREADS];
-    volatile double thread_state[NUM_THREADS];
-    seL4_Word iterations = 1;
-    int num_preemptions = 0;
-
-    /*
-     * We keep increasing the number of iterations ours users should calculate
-     * for until they notice themselves being preempted a few times.
-     */
-    do {
-        /* Start the threads running. */
-        for (int i = 0; i < NUM_THREADS; i++) {
-            create_helper_thread(env, &thread[i]);
-            set_helper_priority(env, &thread[i], 100);
-            start_helper(env, &thread[i], dummy,
-                         (seL4_Word) &thread_state[i], iterations, 0, 0);
-        }
-
-        /* Wait for the threads to finish. */
-        num_preemptions = 0;
-        for (int i = 0; i < NUM_THREADS; i++) {
-            num_preemptions += wait_for_helper(&thread[i]);
-        }
-
-        printf("Num preemptions %d\n", num_preemptions);
-
-        printf("cleanup\n");
-        for (int i = 0; i < NUM_THREADS; i++) {
-            cleanup_helper(env, &thread[i]);
-        }
-
-        printf("cleanup done\n");
-
-        /* Ensure they all got the same result. An assert failure here
-         * indicates FPU corrupt (i.e., a kernel bug). */
-        for (int i = 0; i < NUM_THREADS; i++) {
-            test_assert(thread_state[i] == thread_state[(i + 1) % NUM_THREADS]);
-        }
-
-        /* If we didn't get enough preemptions, restart everything again. */
-        iterations *= 2;
-    } while (num_preemptions < 20);
-}
-DEFINE_TEST(FPU0003, "Try and fuck shit up", test_fpu_bomb, true)
-
 /*
  * Ensure basic FPU functionality works.
  *
@@ -184,15 +106,12 @@ static int test_fpu_multithreaded(struct env *env)
                          (seL4_Word) &thread_state[i], iterations, 0, 0);
         }
 
-        printf("cleanup\n");
         /* Wait for the threads to finish. */
         num_preemptions = 0;
         for (int i = 0; i < NUM_THREADS; i++) {
             num_preemptions += wait_for_helper(&thread[i]);
             cleanup_helper(env, &thread[i]);
         }
-
-        printf("cleanup done\n");
 
         /* Ensure they all got the same result. An assert failure here
          * indicates FPU corrupt (i.e., a kernel bug). */
@@ -268,4 +187,4 @@ int smp_test_fpu(env_t env)
     return sel4test_get_result();
 }
 DEFINE_TEST(FPU0002, "Test FPU remain valid across core migration", smp_test_fpu,
-            config_set(CONFIG_MAX_NUM_NODES) &&config_set(CONFIG_HAVE_TIMER) &&CONFIG_MAX_NUM_NODES > 1)
+            config_set(CONFIG_HAVE_TIMER) &&CONFIG_MAX_NUM_NODES > 1)
