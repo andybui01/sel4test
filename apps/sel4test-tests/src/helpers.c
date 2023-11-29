@@ -277,6 +277,7 @@ void start_helper(env_t env, helper_thread_t *thread, helper_fn_t entry_point,
     } else {
         local_endpoint = thread->local_endpoint.cptr;
     }
+    assert(local_endpoint);
 
     sel4utils_create_word_args(thread->args_strings, thread->args, HELPER_THREAD_TOTAL_ARGS,
                                (seL4_Word) entry_point, local_endpoint,

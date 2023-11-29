@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
-
+#define ZF_LOG_LEVEL ZF_LOG_VERBOSE
 #include <sel4test-driver/gen_config.h>
 #include <assert.h>
 #include <stdio.h>

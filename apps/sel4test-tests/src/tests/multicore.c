@@ -43,7 +43,7 @@ int smp_test_tcb_resume(env_t env)
     sel4test_sleep(env, 10 * NS_IN_MS);
 
     /* Now, counter should have moved. */
-    test_check(counter != old_counter);
+    test_neq(counter, old_counter);
 
     /* Suspend the thread, and move it to new core. */
     seL4_TCB_Suspend(get_helper_tcb(&t1));
